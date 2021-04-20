@@ -12,11 +12,11 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - checkout
-      - run:
-          name: test
-          command: |
-            mkdir -p ~/repo/artifacts
-            touch ~/repo/artifacts/test.txt
+      # - run:
+      #     name: test
+      #     command: |
+      #       mkdir -p ~/repo/artifacts
+      #       touch ~/repo/artifacts/test.txt
       # - run:
       #     name: Update and install required libraries.
       #     command: |
