@@ -13,11 +13,6 @@ jobs:
           at: ~/repo
       - checkout
       - run:
-          name: test
-          command: |
-            mkdir -p ~/repo/artifacts
-            touch ~/repo/artifacts/test.txt
-      - run:
           name: Update and install required libraries.
           command: |
             apt-get update -q
@@ -152,18 +147,9 @@ workflows:
           #     only: /^v.*/
             branches:
               only: circleci-project-setup
-      - build-docker-image:
-          requires:
-            - build-packetbeat-binary
-          filters:
-            # tags:
-            #   only: /^v.*/
-            branches:
-              only: circleci-project-setup
       - build-arm-docker-image:
           requires:
             - build-packetbeat-binary
-            - build-docker-image
           filters:
             # tags:
             #   only: /^v.*/
