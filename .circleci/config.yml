@@ -96,10 +96,10 @@ jobs:
       #       echo $CIRCLE_PROJECT_REPONAME
       #       echo ${CIRCLE_TAG}
       #       $GOPATH/bin/ghr -debug -t ${ACCESS_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ~/repo/artifacts/
-      - persist_to_workspace:
-          root: ~/repo
-          paths:
-            - artifacts
+      # - persist_to_workspace:
+      #     root: ~/repo
+      #     paths:
+      #       - artifacts
   build-docker-image:
     machine:
       image: ubuntu-2004:202101-01
