@@ -117,7 +117,7 @@ workflows:
   build-and-deploy:
     jobs:
       - build-packetbeat-binary:
-          # filters:
+          filters:
           #   tags:
           #     only: /^v.*/
             branches:
@@ -130,4 +130,3 @@ workflows:
             #   only: /^v.*/
             branches:
               only: circleci-project-setup
-
