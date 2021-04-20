@@ -113,6 +113,10 @@ jobs:
           name: Check
           command: |
             ls -la ~/repo/artifacts/{ARM_FOLDER_NAME}/images
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - artifacts
   package-and-release:
     docker:
       - image: cibuilds/github:0.13
@@ -120,13 +124,13 @@ jobs:
       - attach_workspace:
           at: ~/repo
       - run:
-        name: Package tar.gz file
-        command: |
-          cd ~/repo/artifacts/
-          export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
-          tar -czvf ${ARM_FOLDER_NAME}.tar.gz ${ARM_FOLDER_NAME}
-          export AMD_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-amd64
-          tar -czvf ${AMD_FOLDER_NAME}.tar.gz ${AMD_FOLDER_NAME}
+          name: Package tar.gz file
+          command: |
+            cd ~/repo/artifacts/
+            export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
+            tar -czvf ${ARM_FOLDER_NAME}.tar.gz ${ARM_FOLDER_NAME}
+            export AMD_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-amd64
+            tar -czvf ${AMD_FOLDER_NAME}.tar.gz ${AMD_FOLDER_NAME}
       - run:
           name: Publish Release on GitHub
           command: |
