@@ -13,105 +13,118 @@ jobs:
           at: ~/repo
       - checkout
       - run:
-          name: Update and install required libraries.
+          name: test
           command: |
-            apt-get update -q
-            apt-get install -q -y gcc make gcc-multilib glibc-doc manpages-dev wget git flex byacc
-            apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated \
-                  crossbuild-essential-arm64 \
-                  linux-libc-dev-arm64-cross
-      - run:
-          name: Setup Golang environment
-          command: |
-            wget -q https://dl.google.com/go/$GO_TGZ
-            tar -vzxf $GO_TGZ -C /usr/local go
-      - run:
-          name: Clone packetbeat project
-          command: |
-            export GOPATH=/go
-            mkdir -p $GOPATH/src/github.com/elastic
-            cd $GOPATH/src/github.com/elastic
-            git clone --branch $BEAT_VERSION https://github.com/elastic/beats
-      - run:
-          name: Replace Bluecat Packetbeat
-          command: |
-            export GOPATH=/go
-            rm -rf ${GOPATH}/src/github.com/elastic/beats/packetbeat
-            cp -rf ~/repo/packetbeat ${GOPATH}/src/github.com/elastic/beats/packetbeat
-      - run:
-          name: Build packetbeat
-          command: |
-            export GOPATH=/go
-            export PATH=/usr/local/go/bin:$GOPATH/bin:$PATH
-            go version
-            go env
-            cd $GOPATH/src
-            go install github.com/elastic/beats/vendor/github.com/magefile/mage
-            cd $GOPATH/src/github.com/elastic/beats/packetbeat
-            echo "Remove old gopacket"
-            rm -rf $GOPATH/src/github.com/elastic/beats/vendor/github.com/tsg
-            go get -t -d -v ./...
-            echo "Test mage"
-            mage
-            echo "Build ARM architecture binary"
-            GOLANG_CROSSBUILD=1 CGO_ENABLED=1 PLATFORM_ID=linux-arm64 CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ GOOS=linux GOARCH=arm64 make build
-            echo "Build AMD architecture binary"
-            GOLANG_CROSSBUILD=1 CGO_ENABLED=1 CC=gcc CXX=g++ GOARCH=amd64 GOARM= GOOS=linux PLATFORM_ID=linux-amd64 make build
-            ls -la $GOPATH/src/github.com/elastic/beats/packetbeat/build/golang-crossbuild
-      - run:
-          name: Prepare ARM package to public
-          command: |
-            export GOPATH=/go
-            export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
-            mkdir -p ~/repo/artifacts/${ARM_FOLDER_NAME}/{packetbeat,backup}
-            cd ~/repo/artifacts/
-            cp $GOPATH/src/github.com/elastic/beats/packetbeat/build/golang-crossbuild/packetbeat-linux-arm64 ./${ARM_FOLDER_NAME}/packetbeat/packetbeat
-            cp -rf ~/repo/dns-snmp-agent/ ./${ARM_FOLDER_NAME}/
-            cp -rf ~/repo/dns_traffic_deploy.sh ./${ARM_FOLDER_NAME}/
-            tar -czvf ${ARM_FOLDER_NAME}.tar.gz ${ARM_FOLDER_NAME}
-      - run:
-          name: Prepare AMD64 package to public
-          command: |
-            export GOPATH=/go
-            export AMD_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-amd64
-            mkdir -p ~/repo/artifacts/${AMD_FOLDER_NAME}/{packetbeat,backup}
-            cd ~/repo/artifacts/
-            cp $GOPATH/src/github.com/elastic/beats/packetbeat/build/golang-crossbuild/packetbeat-linux-amd64 ./${AMD_FOLDER_NAME}/packetbeat/packetbeat
-            cp -rf ~/repo/dns-snmp-agent/ ./${AMD_FOLDER_NAME}/
-            cp -rf ~/repo/dns_traffic_deploy.sh ./${AMD_FOLDER_NAME}/
-            tar -czvf ${AMD_FOLDER_NAME}.tar.gz ${AMD_FOLDER_NAME}
-      - run:
-          name: Publish Release on GitHub
-          command: |
-            export PATH=/usr/local/go/bin:$PATH
-            export GOPATH=/go
-            ls -la  ~/repo/artifacts
-            go get -u github.com/tcnksm/ghr
-            echo $CIRCLE_PROJECT_USERNAME
-            echo $CIRCLE_PROJECT_REPONAME
-            echo ${CIRCLE_TAG}
-            $GOPATH/bin/ghr -debug -t ${ACCESS_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ~/repo/artifacts/
+            mkdir -p ~/repo/artifacts
+            touch ~/repo/artifacts/test.txt
+      # - run:
+      #     name: Update and install required libraries.
+      #     command: |
+      #       apt-get update -q
+      #       apt-get install -q -y gcc make gcc-multilib glibc-doc manpages-dev wget git flex byacc
+      #       apt-get update && apt-get install -y --no-install-recommends --allow-unauthenticated \
+      #             crossbuild-essential-arm64 \
+      #             linux-libc-dev-arm64-cross
+      # - run:
+      #     name: Setup Golang environment
+      #     command: |
+      #       wget -q https://dl.google.com/go/$GO_TGZ
+      #       tar -vzxf $GO_TGZ -C /usr/local go
+      # - run:
+      #     name: Clone packetbeat project
+      #     command: |
+      #       export GOPATH=/go
+      #       mkdir -p $GOPATH/src/github.com/elastic
+      #       cd $GOPATH/src/github.com/elastic
+      #       git clone --branch $BEAT_VERSION https://github.com/elastic/beats
+      # - run:
+      #     name: Replace Bluecat Packetbeat
+      #     command: |
+      #       export GOPATH=/go
+      #       rm -rf ${GOPATH}/src/github.com/elastic/beats/packetbeat
+      #       cp -rf ~/repo/packetbeat ${GOPATH}/src/github.com/elastic/beats/packetbeat
+      # - run:
+      #     name: Build packetbeat
+      #     command: |
+      #       export GOPATH=/go
+      #       export PATH=/usr/local/go/bin:$GOPATH/bin:$PATH
+      #       go version
+      #       go env
+      #       cd $GOPATH/src
+      #       go install github.com/elastic/beats/vendor/github.com/magefile/mage
+      #       cd $GOPATH/src/github.com/elastic/beats/packetbeat
+      #       echo "Remove old gopacket"
+      #       rm -rf $GOPATH/src/github.com/elastic/beats/vendor/github.com/tsg
+      #       go get -t -d -v ./...
+      #       echo "Test mage"
+      #       mage
+      #       echo "Build ARM architecture binary"
+      #       GOLANG_CROSSBUILD=1 CGO_ENABLED=1 PLATFORM_ID=linux-arm64 CC=aarch64-linux-gnu-gcc CXX=aarch64-linux-gnu-g++ GOOS=linux GOARCH=arm64 make build
+      #       echo "Build AMD architecture binary"
+      #       GOLANG_CROSSBUILD=1 CGO_ENABLED=1 CC=gcc CXX=g++ GOARCH=amd64 GOARM= GOOS=linux PLATFORM_ID=linux-amd64 make build
+      #       ls -la $GOPATH/src/github.com/elastic/beats/packetbeat/build/golang-crossbuild
+      # - run:
+      #     name: Prepare ARM package to public
+      #     command: |
+      #       export GOPATH=/go
+      #       export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
+      #       mkdir -p ~/repo/artifacts/${ARM_FOLDER_NAME}/{packetbeat,backup}
+      #       cd ~/repo/artifacts/
+      #       cp $GOPATH/src/github.com/elastic/beats/packetbeat/build/golang-crossbuild/packetbeat-linux-arm64 ./${ARM_FOLDER_NAME}/packetbeat/packetbeat
+      #       cp -rf ~/repo/dns-snmp-agent/ ./${ARM_FOLDER_NAME}/
+      #       cp -rf ~/repo/dns_traffic_deploy.sh ./${ARM_FOLDER_NAME}/
+      #       tar -czvf ${ARM_FOLDER_NAME}.tar.gz ${ARM_FOLDER_NAME}
+      # - run:
+      #     name: Prepare AMD64 package to public
+      #     command: |
+      #       export GOPATH=/go
+      #       export AMD_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-amd64
+      #       mkdir -p ~/repo/artifacts/${AMD_FOLDER_NAME}/{packetbeat,backup}
+      #       cd ~/repo/artifacts/
+      #       cp $GOPATH/src/github.com/elastic/beats/packetbeat/build/golang-crossbuild/packetbeat-linux-amd64 ./${AMD_FOLDER_NAME}/packetbeat/packetbeat
+      #       cp -rf ~/repo/dns-snmp-agent/ ./${AMD_FOLDER_NAME}/
+      #       cp -rf ~/repo/dns_traffic_deploy.sh ./${AMD_FOLDER_NAME}/
+      #       tar -czvf ${AMD_FOLDER_NAME}.tar.gz ${AMD_FOLDER_NAME}
+      # - run:
+      #     name: Publish Release on GitHub
+      #     command: |
+      #       export PATH=/usr/local/go/bin:$PATH
+      #       export GOPATH=/go
+      #       ls -la  ~/repo/artifacts
+      #       go get -u github.com/tcnksm/ghr
+      #       echo $CIRCLE_PROJECT_USERNAME
+      #       echo $CIRCLE_PROJECT_REPONAME
+      #       echo ${CIRCLE_TAG}
+      #       $GOPATH/bin/ghr -debug -t ${ACCESS_TOKEN} -u ${CIRCLE_PROJECT_USERNAME} -r ${CIRCLE_PROJECT_REPONAME} -c ${CIRCLE_SHA1} -delete ${CIRCLE_TAG} ~/repo/artifacts/
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - artifacts
   build-docker-image:
     machine:
       image: ubuntu-2004:202101-01
       resource_class: arm.medium
     steps:
-      - run: uname -a
-      - run: echo "Hello, Arm!"
-      - run: "docker --help"
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Check
+          command: |
+            ls -la ~/repo/
+            ls -la ~/repo/artifacts
 workflows:
   version: 2
   build-and-deploy:
     jobs:
-      # - build-packetbeat-binary:
-      #     filters:
-      #       tags:
-      #         only: /^v.*/
-      #       branches:
-      #         ignore: /.*/
+      - build-packetbeat-binary:
+          # filters:
+          #   tags:
+          #     only: /^v.*/
+            branches:
+              only: circleci-project-setup
       - build-docker-image:
-          # requires:
-          #   - build-packetbeat-binary
+          requires:
+            - build-packetbeat-binary
           filters:
             # tags:
             #   only: /^v.*/
