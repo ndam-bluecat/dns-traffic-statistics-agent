@@ -96,9 +96,10 @@ jobs:
           command: |
             export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
             ls -la ~/repo/artifacts/
-            ls -la ~/repo/artifacts/${ARM_FOLDER_NAME}
             cd ~/repo/artifacts/${ARM_FOLDER_NAME}/packetbeat
-            docker build -t dns_packetbeat:test .
+            ls -la 
+            cat Dockerfile
+            docker build -t dns_packetbeat:test -f ./Dockerfile
       - run:
           name: Export packetbeat image to tar file
           command: |
