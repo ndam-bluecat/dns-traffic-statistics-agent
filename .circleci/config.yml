@@ -106,27 +106,29 @@ jobs:
             export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
             mkdir -p ~/repo/artifacts/${ARM_FOLDER_NAME}/images
             docker save -o ~/repo/artifacts/${ARM_FOLDER_NAME}/images/dns_packetbeat.tar dns_packetbeat:test
-      # - run:
-      #     name: Build dns_stat_agent arm image
-      #     command: |
-      #       ls -la ~/repo/artifacts/
-      #       ls -la ~/repo/artifacts/${ARM_FOLDER_NAME}
-      #       cd ~/repo/artifacts/${ARM_FOLDER_NAME}/dns-snmp-agent
-      #       docker build -t dns_stat_agent:test .
-      # - run:
-      #     name: Export dns_stat_agent image to tar file
-      #     command: |
-      #       mkdir -p ~/repo/artifacts/${ARM_FOLDER_NAME}/images
-      #       docker save -o ~/repo/artifacts/${ARM_FOLDER_NAME}/images/dns_stat_agent.tar dns_stat_agent:test
+      - run:
+          name: Build dns_stat_agent arm image
+          command: |
+            export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
+            ls -la ~/repo/artifacts/
+            ls -la ~/repo/artifacts/${ARM_FOLDER_NAME}
+            cd ~/repo/artifacts/${ARM_FOLDER_NAME}/dns-snmp-agent
+            docker build -t dns_stat_agent:test .
+      - run:
+          name: Export dns_stat_agent image to tar file
+          command: |
+            export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
+            mkdir -p ~/repo/artifacts/${ARM_FOLDER_NAME}/images
+            docker save -o ~/repo/artifacts/${ARM_FOLDER_NAME}/images/dns_stat_agent.tar dns_stat_agent:test
       - run:
           name: Check
           command: |
             export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
             ls -la ~/repo/artifacts/${ARM_FOLDER_NAME}/images
-      - persist_to_workspace:
-          root: ~/repo
-          paths:
-            - artifacts
+      # - persist_to_workspace:
+      #     root: ~/repo
+      #     paths:
+      #       - artifacts
   package-and-release:
     docker:
       - image: cibuilds/github:0.13
