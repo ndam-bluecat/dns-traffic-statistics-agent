@@ -96,15 +96,28 @@ jobs:
       - run:
           name: Build packetbeat arm image
           command: |
+            echo ${ARM_FOLDER_NAME}
             ls -la ~/repo/artifacts/
             ls -la ~/repo/artifacts/${ARM_FOLDER_NAME}
             cd ~/repo/artifacts/${ARM_FOLDER_NAME}/packetbeat
             docker build -t dns_packetbeat:test .
       - run:
-          name: Export image to tar file
+          name: Export packetbeat image to tar file
           command: |
             mkdir -p ~/repo/artifacts/${ARM_FOLDER_NAME}/images
             docker save -o ~/repo/artifacts/${ARM_FOLDER_NAME}/images/dns_packetbeat.tar dns_packetbeat:test
+      # - run:
+      #     name: Build dns_stat_agent arm image
+      #     command: |
+      #       ls -la ~/repo/artifacts/
+      #       ls -la ~/repo/artifacts/${ARM_FOLDER_NAME}
+      #       cd ~/repo/artifacts/${ARM_FOLDER_NAME}/dns-snmp-agent
+      #       docker build -t dns_stat_agent:test .
+      # - run:
+      #     name: Export dns_stat_agent image to tar file
+      #     command: |
+      #       mkdir -p ~/repo/artifacts/${ARM_FOLDER_NAME}/images
+      #       docker save -o ~/repo/artifacts/${ARM_FOLDER_NAME}/images/dns_stat_agent.tar dns_stat_agent:test
       - run:
           name: Check
           command: |
@@ -142,15 +155,15 @@ workflows:
   version: 2
   build-and-deploy:
     jobs:
-      - build-packetbeat-binary:
-          filters:
-          #   tags:
-          #     only: /^v.*/
-            branches:
-              only: circleci-project-setup
+      # - build-packetbeat-binary:
+      #     filters:
+      #     #   tags:
+      #     #     only: /^v.*/
+      #       branches:
+      #         only: circleci-project-setup
       - build-arm-docker-image:
-          requires:
-            - build-packetbeat-binary
+          # requires:
+          #   - build-packetbeat-binary
           filters:
             # tags:
             #   only: /^v.*/
