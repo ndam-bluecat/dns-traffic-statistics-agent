@@ -68,7 +68,7 @@ jobs:
             cp $GOPATH/src/github.com/elastic/beats/packetbeat/build/golang-crossbuild/packetbeat-linux-arm64 ./${ARM_FOLDER_NAME}/packetbeat/bin/packetbeat
             cp -rf ~/repo/dns-snmp-agent/ ./${ARM_FOLDER_NAME}/
             cp -rf ~/repo/dns_traffic_deploy.sh ./${ARM_FOLDER_NAME}/
-            cp -rf ~/repo/packetbeat/{statistics_config.json,announcement_bam_deploy.py,packetbeat.yml,Dockerfile} ./${ARM_FOLDER_NAME}/
+            cp -rf ~/repo/packetbeat/{statistics_config.json,announcement_bam_deploy.py,packetbeat.yml,Dockerfile} ./${ARM_FOLDER_NAME}/packetbeat
       - run:
           name: Prepare AMD64 package to public
           command: |
@@ -79,7 +79,7 @@ jobs:
             cp $GOPATH/src/github.com/elastic/beats/packetbeat/build/golang-crossbuild/packetbeat-linux-amd64 ./${AMD_FOLDER_NAME}/packetbeat/bin/packetbeat
             cp -rf ~/repo/dns-snmp-agent/ ./${AMD_FOLDER_NAME}/
             cp -rf ~/repo/dns_traffic_deploy.sh ./${AMD_FOLDER_NAME}/
-            cp -rf ~/repo/packetbeat/{statistics_config.json,announcement_bam_deploy.py,packetbeat.yml,Dockerfile} ./${AMD_FOLDER_NAME}/
+            cp -rf ~/repo/packetbeat/{statistics_config.json,announcement_bam_deploy.py,packetbeat.yml,Dockerfile} ./${AMD_FOLDER_NAME}/packetbeat
       - persist_to_workspace:
           root: ~/repo
           paths:
@@ -99,7 +99,7 @@ jobs:
             cd ~/repo/artifacts/${ARM_FOLDER_NAME}/packetbeat
             ls -la 
             cat Dockerfile
-            docker build -t dns_packetbeat:test -f ./Dockerfile
+            docker build -t dns_packetbeat:test .
       - run:
           name: Export packetbeat image to tar file
           command: |
