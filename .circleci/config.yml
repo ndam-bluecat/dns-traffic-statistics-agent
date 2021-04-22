@@ -125,10 +125,55 @@ jobs:
           command: |
             export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
             ls -la ~/repo/artifacts/${ARM_FOLDER_NAME}/images
-      # - persist_to_workspace:
-      #     root: ~/repo
-      #     paths:
-      #       - artifacts
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - artifacts
+  build-amd-docker-image:
+    docker:
+      - image: circleci/buildpack-deps:stretch
+    steps:
+      - setup_remote_docker
+      - attach_workspace:
+          at: ~/repo
+      - run:
+          name: Build packetbeat amd image
+          command: |
+            export AMD_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-amd64
+            ls -la ~/repo/artifacts/
+            cd ~/repo/artifacts/${AMD_FOLDER_NAME}/packetbeat
+            ls -la 
+            cat Dockerfile
+            docker build -t dns_packetbeat:test .
+      - run:
+          name: Export packetbeat image to tar file
+          command: |
+            export AMD_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-amd64
+            mkdir -p ~/repo/artifacts/${AMD_FOLDER_NAME}/images
+            docker save -o ~/repo/artifacts/${AMD_FOLDER_NAME}/images/dns_packetbeat.tar dns_packetbeat:test
+      - run:
+          name: Build dns_stat_agent amd image
+          command: |
+            export AMD_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-amd64
+            ls -la ~/repo/artifacts/
+            ls -la ~/repo/artifacts/${AMD_FOLDER_NAME}
+            cd ~/repo/artifacts/${AMD_FOLDER_NAME}/dns-snmp-agent
+            docker build -t dns_stat_agent:test .
+      - run:
+          name: Export dns_stat_agent image to tar file
+          command: |
+            export AMD_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-amd64
+            mkdir -p ~/repo/artifacts/${AMD_FOLDER_NAME}/images
+            docker save -o ~/repo/artifacts/${AMD_FOLDER_NAME}/images/dns_stat_agent.tar dns_stat_agent:test
+      - run:
+          name: Check
+          command: |
+            export AMD_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-amd64
+            ls -la ~/repo/artifacts/${AMD_FOLDER_NAME}/images
+      - persist_to_workspace:
+          root: ~/repo
+          paths:
+            - artifacts
   package-and-release:
     docker:
       - image: cibuilds/github:0.13
@@ -165,6 +210,14 @@ workflows:
             branches:
               only: circleci-project-setup
       - build-arm-docker-image:
+          requires:
+            - build-packetbeat-binary
+          filters:
+            # tags:
+            #   only: /^v.*/
+            branches:
+              only: circleci-project-setup
+      - build-amd-docker-image:
           requires:
             - build-packetbeat-binary
           filters:
