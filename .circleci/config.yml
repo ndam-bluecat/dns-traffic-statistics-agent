@@ -190,7 +190,7 @@ jobs:
           root: ~/release
           paths:
             - packages
-  package-and-release:
+  release:
     docker:
       - image: cibuilds/github:0.13
     steps:
@@ -204,7 +204,6 @@ jobs:
           name: Publish Release on GitHub
           command: |
             echo "Release ${CIRCLE_PROJECT_REPONAME}:${CIRCLE_TAG}"
-            ls -la  ~/repo/artifacts
             echo $CIRCLE_PROJECT_USERNAME
             echo $CIRCLE_PROJECT_REPONAME
             echo ${CIRCLE_TAG}
@@ -235,7 +234,7 @@ workflows:
               only: /^v.*/
             branches:
               ignore: /.*/
-      - package-and-release:
+      - release:
           requires:
             - build-arm-docker-image
             - build-amd-docker-image
