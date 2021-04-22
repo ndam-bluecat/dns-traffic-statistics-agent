@@ -95,6 +95,7 @@ jobs:
           name: Build packetbeat arm image
           command: |
             export ARM_FOLDER_NAME=${CIRCLE_PROJECT_REPONAME}-arm64
+            ls -la ~/repo/artifacts/
             ls -la ~/repo/artifacts/{ARM_FOLDER_NAME}
             cd ~/repo/artifacts/{ARM_FOLDER_NAME}/packetbeat
             docker build -t dns_packetbeat:test .
