@@ -10,4 +10,3 @@ RUN pip install -r /opt/dns-snmp-agent/requirements.txt && \
     echo "mibs BCN-DNS-AGENT-MIB" > /etc/snmp/snmp.conf
 
 CMD [ "/usr/bin/python", "/opt/dns-snmp-agent/dns_stat_agent.py" ]
-

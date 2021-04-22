@@ -9,4 +9,3 @@ COPY statistics_config.json announcement_bam_deploy.py bin/packetbeat /usr/share
 COPY packetbeat.yml /etc/packetbeat/
 
 CMD ["/usr/share/packetbeat/bin/packetbeat", "-c", "/etc/packetbeat/packetbeat.yml", "--path.logs", "/var/log/packetbeat", "--path.home", "/usr/share/packetbeat", "--path.config", "/etc/packetbeat", "--path.data", "/var/lib/packetbeat"]
-
