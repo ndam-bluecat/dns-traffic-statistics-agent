@@ -128,7 +128,7 @@ jobs:
       - persist_to_workspace:
           root: ~/repo
           paths:
-            - artifacts
+            - artifacts/${CIRCLE_PROJECT_REPONAME}-arm64
   build-amd-docker-image:
     docker:
       - image: circleci/buildpack-deps:stretch
@@ -173,7 +173,7 @@ jobs:
       - persist_to_workspace:
           root: ~/repo
           paths:
-            - artifacts
+            - artifacts/${CIRCLE_PROJECT_REPONAME}-amd64
   package-and-release:
     docker:
       - image: cibuilds/github:0.13
@@ -234,7 +234,6 @@ workflows:
               ignore: /.*/
       - package-and-release:
           requires:
-            - build-packetbeat-binary
             - build-arm-docker-image
             - build-amd-docker-image
           filters:
