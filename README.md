@@ -36,23 +36,56 @@
 
 ## 2. Setup 
  Can be setup either using Section 2.1 or 2.2</h2>
->Note: Make sure that DNS service (named) is running so that DNS queries can be received and responded
-## 2.1 Setup dns traffic statistic agent docker container on BDDS 9.3 in ARM System
+>Note:
+> - Make sure that DNS service (named) is running so that DNS queries can be received and responded
+> - Make sure SNMP service are running so that the dns statistic agent can register to the master SNMP agent.
+## 2.1. Setup dns statistic agent docker container on BDDS 9.3 in ARM System
 
-### Import a docker image from file named dns_traffic_arm.tar
-- Download and copy dns_traffic_arm.tar to BDDS system  
+### Import a docker image from file named dns-traffic-statistics-agent-arm64.tar.gz (dns-traffic-statistics-agent-amd64.tar.gz if in AMD system)
+- Download and copy dns-traffic-statistics-agent-arm64.tar.gz to BDDS system  
+- Extract dns-traffic-statistics-agent-arm64.tar.gz file
+- Go to dns-traffic-statistics-agent-arm64/images directory which have both dns_stat_agent.tar and dns_packetbeat.tar files.  
 - Require to have docker installed in this Virtual Machine.
-- Load image from zip file
+- Load images from zip files
   ```
-  docker load -i dns_traffic_arm.tar
+  docker load -i dns_stat_agent.tar
+  docker load -i dns_packetbeat.tar
   ```
   
-### Run docker container from a docker image named dns_traffic_arm
+### Run docker container from a docker image named dns_stat_agent
+- Copy **BCN-DNS-AGENT-MIB.mib** into folder /usr/share/snmp/mibs and append "BCN-DNS-AGENT-MIB" end of /etc/snmp/snmp.conf.
 - Run docker container:
   ```
-  docker run --cap-add=NET_ADMIN --network=host -d -it --name dns_traffic_arm -v /replicated/jail/named/etc/named.conf:/replicated/jail/named/etc/named.conf -v /var/agentx/master:/var/agentx/master -v /usr/share/snmp/mibs/:/usr/share/snmp/mibs/ -v /var/lib/snmp/mibs/iana/:/var/lib/snmp/mibs/iana/ -v /var/lib/snmp/mibs/ietf/:/var/lib/snmp/mibs/ietf/ -v <packetbeat.yml directories>:/etc/packetbeat/packetbeat.yml -v <statistics_config.json directories>:/usr/share/packetbeat/bin/statistics_config.json dns_traffic_arm:<tag> bash
+  docker run --network=host -d --name dns_stat_agent -v /replicated/jail/named/etc/named.conf:/replicated/jail/named/etc/named.conf -v /var/agentx/master:/var/agentx/master -v /usr/share/snmp/mibs/:/usr/share/snmp/mibs/ -v /var/lib/snmp/mibs/iana/:/var/lib/snmp/mibs/iana/ -v /var/lib/snmp/mibs/ietf/:/var/lib/snmp/mibs/ietf/ dns_stat_agent:<tag> 
   ```
-- Copy **BCN-DNS-AGENT-MIB.mib** into folder /usr/share/snmp/mibs and append "BCN-DNS-AGENT-MIB" end of /etc/snmp/snmp.conf.
+- Note: to mount dns_stat_agent_logs, use the following option:
+  ```
+  -v <dns_stat_agent_logs directories>:/var/log/dns_stat_agent/ 
+  ```
+
+### Run docker container from a docker image named dns_packetbeat
+- In dns-traffic-statistics-agent-arm64/packetbeat/ there is announcement_bam_deploy.py file
+- Open postDeploy.sh from the link /usr/local/bluecat/postDeploy.sh and add the following line at the bottom of this file: <br> 
+   ```python2 <full path announcement_bam_deploy.py>```
+- Run docker container:
+  ```
+  docker run --cap-add=NET_ADMIN --network=host -d --name dns_packetbeat -v /replicated/jail/named/etc/named.conf:/replicated/jail/named/etc/named.conf dns_packetbeat:<tag>
+  ```
+- Note:
+  - To change config packetbeat, use the following option. Make sure to set permission for packetbeat.yml
+  ```
+  chmod go-w packetbeat/packetbeat.yml
+  chown root:root packetbeat/packetbeat.yml
+  -v <full path to packetbeat.yml>:/etc/packetbeat/packetbeat.yml
+  ```
+  - To mount packetbeat logs, use the following option:	
+  ```
+  -v <packetbeat_logs directories>:/var/log/packetbeat/
+  ```
+  - To change statistics_config.json, use the following option:
+  ```
+  -v <full path to statistics_config.json>:/usr/share/packetbeat/bin/statistics_config.json
+  ```
 
 ## 2.2. Setup dns traffic statistic agent on BDDS 9.3 manually
 ## 2.2.1. Packetbeat installation and usage
@@ -72,8 +105,9 @@ Extract the dns-traffic-statistic-agent.tar.gz to a folder in BDDS, then follow 
 	```
 	dpkg -i packetbeat.deb
 	```
-2. Open postDeploy.sh from the link /usr/local/bluecat/postDeploy.sh and add line ```python /usr/share/packetbeat/bin/announcement_bam_deploy.py```
- at the bottom of this file
+- In dns-traffic-statistics-agent-arm64/packetbeat/ there is announcement_bam_deploy.py file
+2. Open postDeploy.sh from the link /usr/local/bluecat/postDeploy.sh and add the following line at the bottom of this file: <br> 
+   ```python2 <full path announcement_bam_deploy.py>``` 
    
 ## 2.2.2. SNMP Subagent installation and usage
 ### Running Packetbeat
