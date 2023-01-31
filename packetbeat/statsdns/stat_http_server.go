@@ -17,6 +17,7 @@ package statsdns
 import (
 	"fmt"
 	"net/http"
+	"strings"
 
 	"github.com/elastic/beats/libbeat/logp"
 )
