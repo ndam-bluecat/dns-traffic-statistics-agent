@@ -34,7 +34,7 @@ func onLoadHTTPServer() {
 	http.HandleFunc(uriAnnouncementFromBam, reqAnnouncementDeployFromBam)
 	if err := http.ListenAndServe(StatHTTPServerAddr, nil); err != nil {
 		if strings.Contains(err.Error(), "address already in use"){
-	        logp.Err("onLoadHTTPServer", err)
+	        logp.Err("onLoadHTTPServer", err.Error())
 	    } else {
 	        panic(err)
 		    logp.Err("onLoadHTTPServer", err)
