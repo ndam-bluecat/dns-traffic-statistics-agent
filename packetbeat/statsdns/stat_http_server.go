@@ -35,6 +35,10 @@ func onLoadHTTPServer() {
 	if err := http.ListenAndServe(StatHTTPServerAddr, nil); err != nil {
 		if strings.Contains(err.Error(), "address already in use"){
 	        logp.Err("onLoadHTTPServer", err.Error())
+			_, err := exec.Command("fuser", "-k", "51416/tcp").Output()
+			if err != nil {
+				panic(err)
+			}
 	    } else {
 	        panic(err)
 		    logp.Err("onLoadHTTPServer", err)
