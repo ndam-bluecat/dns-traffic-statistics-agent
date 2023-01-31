@@ -34,15 +34,22 @@ func onLoadHTTPServer() {
 	// Receive request when postDeploy send request AnnouncementDeployFromBam
 	http.HandleFunc(uriAnnouncementFromBam, reqAnnouncementDeployFromBam)
 	if err := http.ListenAndServe(StatHTTPServerAddr, nil); err != nil {
-		if strings.Contains(err.Error(), "address already in use"){
+		if strings.Contains(err.Error(), "address already in use") {
 	        logp.Err("onLoadHTTPServer", err.Error())
 			_, err := exec.Command("fuser", "-k", "51416/tcp").Output()
 			if err != nil {
+				logp.Err("onLoadHTTPServer", err.Error())
 				panic(err)
+			} else {
+				logp.Info("TCP Port %v is available\n", StatHTTPServerAddr[strings.LastIndex(StatHTTPServerAddr, ":")+1:])
+				if err := http.ListenAndServe(StatHTTPServerAddr, nil); err != nil {
+					logp.Err("onLoadHTTPServer", err.Error())
+					panic(err)
+				}
 			}
 	    } else {
-	        panic(err)
-		    logp.Err("onLoadHTTPServer", err)
+	        logp.Err("onLoadHTTPServer", err.Error())
+			panic(err)
 	    }
 	}
 }
