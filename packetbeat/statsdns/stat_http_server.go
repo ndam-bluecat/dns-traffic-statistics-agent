@@ -16,7 +16,7 @@ package statsdns
 
 import (
 	"fmt"
-	"exec"
+	"os/exec"
 	"net/http"
 	"strings"
 
