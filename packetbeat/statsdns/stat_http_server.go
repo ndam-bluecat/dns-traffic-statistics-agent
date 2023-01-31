@@ -32,7 +32,11 @@ func onLoadHTTPServer() {
 	// Receive request when postDeploy send request AnnouncementDeployFromBam
 	http.HandleFunc(uriAnnouncementFromBam, reqAnnouncementDeployFromBam)
 	if err := http.ListenAndServe(StatHTTPServerAddr, nil); err != nil {
-		panic(err)
-		logp.Err("onLoadHTTPServer", err)
+		if strings.Contains(err.Error(), "address already in use"){
+	        logp.Err("onLoadHTTPServer", err)
+	    } else {
+	        panic(err)
+		    logp.Err("onLoadHTTPServer", err)
+	    }
 	}
 }
