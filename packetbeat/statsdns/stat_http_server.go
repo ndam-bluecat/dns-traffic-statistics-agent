@@ -36,7 +36,8 @@ func onLoadHTTPServer() {
 	if err := http.ListenAndServe(StatHTTPServerAddr, nil); err != nil {
 		if strings.Contains(err.Error(), "address already in use") {
 	        logp.Err("onLoadHTTPServer", err)
-			_, err := exec.Command("bash", "-c", "kill -9 $(lsof -t -i:51416)").Output()
+			cmd := exec.Command("bash", "-c", "kill -9 $(lsof -t -i:51416)")
+			_, err := cmd.Output()
 			if err != nil {
 				logp.Err("onLoadHTTPServer", err.Error())
 				panic(err)
