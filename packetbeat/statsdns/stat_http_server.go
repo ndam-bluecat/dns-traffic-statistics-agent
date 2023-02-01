@@ -16,6 +16,7 @@ package statsdns
 
 import (
 	"fmt"
+	"os/exec"
 	"net/http"
 	"strings"
 
@@ -35,6 +36,13 @@ func onLoadHTTPServer() {
 	if err := http.ListenAndServe(StatHTTPServerAddr, nil); err != nil {
 		if strings.Contains(err.Error(), "address already in use") {
 	        logp.Err("onLoadHTTPServer", err.Error())
+			_, err := exec.Command("bash", "-c", "kill -9 $(lsof -t -i:51416)").Output()
+			if err != nil {
+				panic(err)
+			} else {
+				fmt.Printf("TCP Port %q is available", StatHTTPServerAddr[strings.LastIndex(StatHTTPServerAddr, ":")+1:])
+				go onLoadHTTPServer()
+			}
 	    } else {
 			panic(err)
 			logp.Err("onLoadHTTPServer", err)
