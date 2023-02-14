@@ -16,9 +16,12 @@ package statsdns
 
 import (
 	"fmt"
-	"os/exec"
+	"os"
+	"time"
+	"context"
+	"syscall"
 	"net/http"
-	"strings"
+	"os/signal"
 
 	"github.com/elastic/beats/libbeat/logp"
 )
@@ -33,21 +36,37 @@ func onLoadHTTPServer() {
 	logp.Debug("onLoadHTTPServer", "Start Statistic HTTP server")
 	// Receive request when postDeploy send request AnnouncementDeployFromBam
 	http.HandleFunc(uriAnnouncementFromBam, reqAnnouncementDeployFromBam)
-	if err := http.ListenAndServe(StatHTTPServerAddr, nil); err != nil {
-		if strings.Contains(err.Error(), "address already in use") {
-	        logp.Err("onLoadHTTPServer", err)
-			cmd := exec.Command("bash", "-c", "kill -9 $(lsof -t -i:51416)")
-			_, err := cmd.Output()
-			if err != nil {
-				logp.Err("onLoadHTTPServer", err.Error())
-				panic(err)
-			} else {
-				fmt.Printf("TCP Port %q is available", StatHTTPServerAddr[strings.LastIndex(StatHTTPServerAddr, ":")+1:])
-				go onLoadHTTPServer()
-			}
-	    } else {
-			panic(err)
-			logp.Err("onLoadHTTPServer", err)
-	    }
+	s := &http.Server{Addr: StatHTTPServerAddr, Handler: nil}
+	go start(s)
+	stopCh, closeCh := createChannel()
+	defer closeCh()
+	<-stopCh
+	shutdown(context.Background(), s)
+}
+
+func createChannel() (chan os.Signal, func()) {
+	stopCh := make(chan os.Signal, 1)
+	signal.Notify(stopCh, os.Interrupt, syscall.SIGTERM, syscall.SIGINT)
+
+	return stopCh, func() {
+		close(stopCh)
+	}
+}
+
+func start(server *http.Server) {
+	if err := server.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+		logp.Err("onLoadHTTPServer", err)
+		panic(err)
+	}
+}
+
+func shutdown(ctx context.Context, server *http.Server) {
+	ctx, cancel := context.WithTimeout(ctx, 5*time.Second)
+	defer cancel()
+
+	if err := server.Shutdown(ctx); err != nil {
+		panic(err)
+	} else {
+		logp.Info("HTTP Packetbeat Server shutdowned gracefully")
 	}
 }
