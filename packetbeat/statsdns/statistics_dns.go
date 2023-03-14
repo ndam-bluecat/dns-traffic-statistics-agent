@@ -754,24 +754,35 @@ func CalculateAverageTimePerView(clientIp string, responseTime float64, metricTy
 }
 
 func FindClientInView(clientIP string) string {
+	logp.Info("=====clientIP: %v=====", clientIP)
 	result := ""
 	foundView := false
 	for i := 0; i < len(MapViewIPs); i++ {
 		for viewName := range MapViewIPs[i] {
+			logp.Info("=====viewName: %v=====", viewName)
 			for _, matchIP := range MapViewIPs[i][viewName] {
+				logp.Info("=====matchIP: %v=====", matchIP)
 				//Ingore case
 				if strings.Contains(matchIP, "!") {
 					// Case for Ignore IP range
+					matchIp := strings.TrimLeft(matchIP, "!")
+					logp.Info("=====matchIp: %v=====", matchIp)
 					// If / character in matchIP
 					if strings.Contains(matchIP, "/") {
-						if utils.CheckIpRangeFromString(clientIP, matchIP) {
+						_, ipNet, _ := net.ParseCIDR(matchIp)
+						logp.Info("=====ipNet: %v=====", ipNet)
+						logp.Info("=====Before ipNet.Contains(net.ParseIP(clientIP))=====")
+						if ipNet.Contains(net.ParseIP(clientIP)) {
+							logp.Info("=====After ipNet.Contains(net.ParseIP(clientIP))=====")
 							result = ""
 							foundView = true
 							break
 						}
 					}
 					//Case for Ignore IP
-					if strings.Contains(matchIP, clientIP) {
+					logp.Info("=====Before matchIp == clientIP=====")
+					if matchIp == clientIP {
+						logp.Info("=====After matchIp == clientIP=====")
 						result = ""
 						foundView = true
 						break
@@ -801,6 +812,7 @@ func FindClientInView(clientIP string) string {
 			break
 		}
 	}
+	logp.Info("=====result: %v=====", result)
 	return result
 }
 
@@ -826,7 +838,7 @@ func ReloadNamedData(isInit bool) {
 
 	logp.Info("IPs Range In ACL Server: %v", IpNetsServer)
 	logp.Info("IPs Range In ACL Client: %v", IpNetsClient)
-	logp.Info("IP In ACL Server: %v", IpsServer)
+	logp.Info("IPs In ACL Server: %v", IpsServer)
 	logp.Info("IPs In ACL Client: %v", IpsClient)
 	logp.Info("Map View Client IPs %v", MapViewIPs)
 
